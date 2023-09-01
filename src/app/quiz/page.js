@@ -1,21 +1,34 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
 import styles from "../page.module.css";
 import NavigationPanel from "@/component/NavigationPanel";
 import Question from "@/component/Question";
 
 const QuizPage = () => {
-  const router = useRouter();
   const [remainingTime, setRemainingTime] = useState(1800); // 30 minutes in seconds
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [sampleQuestions, setSampleQuestions] = useState({});
   const [userAnswers, setUserAnswers] = useState(Array(0));
-  const [showResult, setShowResult] = useState(false);
+  const [isLastQuestion, setIsLastQuestion] = useState(false);
+  const [quizSubmitted, setQuizSubmitted] = useState(false);
+
+
+
+  useEffect(() => {
+    if (
+      sampleQuestions?.results &&
+      currentQuestionIndex === sampleQuestions.results.length - 1
+    ) {
+      setIsLastQuestion(true);
+    } else {
+      setIsLastQuestion(false);
+    }
+  }, [currentQuestionIndex, sampleQuestions]);
 
   useEffect(() => {
     const fetchData = async () => {
+      // API call 
       try {
         const response = await fetch("https://opentdb.com/api.php?amount=15");
         const data = await response.json();
@@ -54,20 +67,23 @@ const QuizPage = () => {
   const handleNextQuestion = () => {
     if (currentQuestionIndex < sampleQuestions.results.length - 1) {
       setCurrentQuestionIndex((prevIndex) => prevIndex + 1);
-    } else {
-      handleShowResult();
+    }
+  };
+
+  const handlePrevQuestion = () => {
+    if (currentQuestionIndex > 0) {
+      setCurrentQuestionIndex((prevIndex) => prevIndex - 1);
     }
   };
 
   const handleShowResult = () => {
-    setShowResult(true);
-    // Calculate score and other results here
+    setQuizSubmitted(true);
   };
 
   return (
     <div className={styles.wrapper}>
-      <div className={styles.quizContainer}>
-        <div className={styles.timer}>
+      <div className=  {quizSubmitted ? '' : styles.quizContainer}>
+        {!quizSubmitted && (<div className={styles.timer}>
           <div className={styles.title}>Quiz Application</div>
           <div className={styles.timer11}>
             <div className={styles.time_left_txt}>Time Left</div>
@@ -75,21 +91,25 @@ const QuizPage = () => {
               {Math.floor(remainingTime / 60)}:{remainingTime % 60}
             </div>
           </div>
-        </div>
+        </div>)}
         <Question
           sampleQuestions={sampleQuestions}
           currentQuestionIndex={currentQuestionIndex}
           handleSelectAnswer={handleSelectAnswer}
-          showResult={showResult}
           handleNextQuestion={handleNextQuestion}
+          handlePrevQuestion={handlePrevQuestion}
+          isLastQuestion={isLastQuestion}
+          handleShowResult={handleShowResult}
+          userAnswers={userAnswers}
         />
       </div>
-      <NavigationPanel
+      {!quizSubmitted &&
+        (<NavigationPanel
         sampleQuestions={sampleQuestions}
         currentQuestionIndex={currentQuestionIndex}
         userAnswers={userAnswers}
         handleNavigateToQuestion={handleNavigateToQuestion}
-      />
+      />)}
     </div>
   );
 };
