@@ -1,5 +1,3 @@
-
-
 import React from "react";
 import styles from "../app/page.module.css";
 
@@ -12,6 +10,14 @@ const NavigationPanel = ({
   return (
     <div className={styles.navigationPanel}>
       <h3>Question Overview</h3>
+      <div className={styles.gridIndication}>
+      <div
+        className={styles.gridBox1}
+      >Attempted</div>
+      <div
+        className={styles.gridBox2}
+      >Unattempted</div>
+    </div>
       <div className={styles.overviewList}>
         {sampleQuestions.results?.map((question, index) => (
           <div
